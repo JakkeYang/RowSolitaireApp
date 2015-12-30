@@ -3,6 +3,8 @@ package com.miluhe.rowsolitaireapp.stages;
 import java.util.ArrayList;
 import java.util.List;
 
+import utils.SaveUtils;
+import android.graphics.Point;
 import android.util.Log;
 
 import com.badlogic.gdx.Gdx;
@@ -22,6 +24,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction;
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.miluhe.rowsolitaire.LogicHelper;
+import com.miluhe.rowsolitaireapp.R;
+import com.miluhe.rowsolitaireapp.SolitaireApplication;
 import com.miluhe.rowsolitaireapp.actors.PokerCard;
 
 /**
@@ -35,9 +39,13 @@ public class PokerStage extends Stage {
     private int[] mCardsA = new int[17];
     private int[] mCardsB = new int[17];
     private int[] mCardsM = new int[17];
+    
+    // FIXME
+    //  get from values folder
     private static final float KMarcoCardBeginX = 100.0f;
     private static final float KMarcoCardBeginY = 100.0f;
     private static final float KMarcoCardOffsetX = 30.0f;
+    // end
     List<PokerCard> mListActors = new ArrayList<PokerCard>();
 
     public PokerStage() {
@@ -47,12 +55,16 @@ public class PokerStage extends Stage {
         this.addActor( mBackgroundImage );
         helper = new LogicHelper();
 
-        helper.startTable();;
+        helper.startTable();
         mCardsA = helper.showAlphaCards();
         mCardsB = helper.showBelleCards();
         mCardsM = helper.showMarcoCards();
 
-        float x = KMarcoCardBeginX;
+        Point screenSize = new Point();
+        int offset = SolitaireApplication.getContextObject()
+        				.getResources().getInteger(R.integer.cardoffset);
+        SaveUtils.getScreenSize(screenSize);
+        float x = (screenSize.x - 16*offset - PokerCard.KWidth) / 2;
         float y = KMarcoCardBeginY;
 
 //        for ( int i : mCardsA ) {

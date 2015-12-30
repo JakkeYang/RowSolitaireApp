@@ -11,20 +11,20 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
  * Created by jakke on 15-12-29.
  */
 public class PokerCard extends Actor {
-    // 黑桃
+    // Spade
     public static final int KSpades = 1;
 
-    // 红桃
+    // Heart
     public static final int KHearts = 2;
 
-    // 梅花
+    // Club
     public static final int KClubs = 3;
 
-    // 方块
+    // Diamond
     public static final int KDiamonds = 4;
 
-    private final int KWidth = 120;
-    private final int KHeight = 160;
+    public static final int KWidth = 120;
+    public static final int KHeight = 160;
 
     private int mValue = 0;
     private TextureRegion mTextureRegion;
