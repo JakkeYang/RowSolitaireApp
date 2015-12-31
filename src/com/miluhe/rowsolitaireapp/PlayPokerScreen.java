@@ -30,6 +30,7 @@ public class PlayPokerScreen implements Screen {
     //  Screen
     @Override
     public void dispose() {
+    	mPokerStage.dispose();
     }
 
     @Override

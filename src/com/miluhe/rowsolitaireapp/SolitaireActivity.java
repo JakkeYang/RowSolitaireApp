@@ -10,6 +10,7 @@ import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 
 public class SolitaireActivity extends AndroidApplication {
+	private SolitaireGame mGame;
 	
 	@Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -17,7 +18,9 @@ public class SolitaireActivity extends AndroidApplication {
 
 		AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
         cfg.useGL20 = true;
-        initialize( new SolitaireGame(), false );
+        
+        mGame = new SolitaireGame();
+        initialize( mGame, false );
         
         WindowManager wm = (WindowManager) this
         		.getSystemService(Context.WINDOW_SERVICE);

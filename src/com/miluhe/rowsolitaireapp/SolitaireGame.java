@@ -7,11 +7,18 @@ import com.badlogic.gdx.Game;
  */
 public class SolitaireGame extends Game {
 
+	PlayPokerScreen mPlayScreen;
+	
     @Override
     public void create() {
-        PlayPokerScreen playScreen = new PlayPokerScreen();
-        this.setScreen(playScreen);
+    	mPlayScreen = new PlayPokerScreen();
+        this.setScreen(mPlayScreen);
     }
 
+    @Override
+    public void dispose() {
+    	mPlayScreen.dispose();
+    	SolitaireTextureLoader.instance().dispose();
+    }
 
 }

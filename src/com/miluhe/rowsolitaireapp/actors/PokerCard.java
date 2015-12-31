@@ -1,11 +1,15 @@
 package com.miluhe.rowsolitaireapp.actors;
 
+import android.content.res.Resources.NotFoundException;
+import android.util.TypedValue;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.miluhe.rowsolitaireapp.R;
+import com.miluhe.rowsolitaireapp.SolitaireApplication;
 
 /**
  * Created by jakke on 15-12-29.
@@ -23,20 +27,46 @@ public class PokerCard extends Actor {
     // Diamond
     public static final int KDiamonds = 4;
 
-    public static final int KWidth = 120;
-    public static final int KHeight = 160;
+    public static final int KCardTextureX = 180;
+    public static final int KCardTextureY = 250;
+    public static final int KGapH = 7;
+    public static final int KGapW = 23;
 
     private int mValue = 0;
     private TextureRegion mTextureRegion;
     private float mPositionX = .0f;
     private float mPositionY = .0f;
+    private static float mCardW = 0;
+    private static float mCardH = 0;
 
+    static {
+    	try {
+	    	TypedValue v = new TypedValue();
+	    	SolitaireApplication.getContextObject()
+	    			.getResources().getValue(R.dimen.cardx, v, true);
+	    	
+	    	mCardW = v.getFloat();
+	    	SolitaireApplication.getContextObject()
+	    			.getResources().getValue(R.dimen.cardy, v, true);
+	    	mCardH = v.getFloat();
+    	} catch (NotFoundException e) {
+    		e.printStackTrace();
+    	}
+    }
+    
     public PokerCard( int pokerValue ) {
         mValue = pokerValue;
-
-        String fileName = "poker/" + mValue + ".jpg";
+        int suit = (mValue % 13 == 0)? mValue / 13 - 1 : mValue / 13;
+        int value = (mValue % 13 == 0)? 13 : mValue % 13;
+        
+//        Texture texture = 
+//            SolitaireTextureLoader.instance().load(SolitaireTextureLoader.KPokerTexture);
+        String fileName = "poker/cards.png";
         Texture texture = new Texture( Gdx.files.internal( fileName ) );
-        mTextureRegion = new TextureRegion( texture, 0, 0, 169, 256 );
+        mTextureRegion = new TextureRegion( texture
+        		, (value - 1)*( KCardTextureX + KGapW)
+        		, suit * (KCardTextureY + KGapH)
+        		, KCardTextureX, KCardTextureY );
     }
 
     public int getmValue() {
@@ -56,7 +86,7 @@ public class PokerCard extends Actor {
     public void draw( SpriteBatch batch, float parentAlpha ) {
         super.draw(batch, parentAlpha);
 
-        batch.draw( mTextureRegion, mPositionX, mPositionY, KWidth, KHeight );
+        batch.draw( mTextureRegion, mPositionX, mPositionY, mCardW, mCardH );
     }
 
     /**
