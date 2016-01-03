@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-   <item name="cardoffset" type="dimen" format="integer">32</item>  
-   <item name="cardx" type="dimen" format="float">180</item>  
-   <item name="cardy" type="dimen" format="float">250</item>  
+    <item name="cardoffset" type="dimen" format="integer">32</item>
+    <item name="cardx" type="dimen" format="float">180</item>
+    <item name="cardy" type="dimen" format="float">250</item>
+    <item name="cardPlayedx" type="dimen" format="float">160</item>
+    <item name="cardPlayedy" type="dimen" format="float">222.22</item>
 
 </resources>

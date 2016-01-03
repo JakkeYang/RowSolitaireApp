@@ -15,11 +15,7 @@ public class SolitaireTextureLoader implements Disposable {
 	
 	private HashMap<String, Texture> mTextures;
 	private AssetManager mAssetManager;
-	private static SolitaireTextureLoader mSelf;
-	
-	static {
-		mSelf = null;
-	}
+	private static SolitaireTextureLoader mSelf = null;
 	
 	private SolitaireTextureLoader() {
 		mTextures = new HashMap<String, Texture>();
@@ -54,6 +50,7 @@ public class SolitaireTextureLoader implements Disposable {
 			Texture val = (Texture) entry.getValue();
 			val.dispose();
 		}
+        mSelf = null;
 	}
 
 }

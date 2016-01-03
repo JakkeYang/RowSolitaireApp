@@ -8,9 +8,13 @@ import android.content.res.Resources.NotFoundException;
 import android.graphics.Point;
 import android.util.TypedValue;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
+import com.badlogic.gdx.scenes.scene2d.actions.ParallelAction;
+import com.badlogic.gdx.scenes.scene2d.actions.ScaleByAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.miluhe.rowsolitaire.LogicHelper;
 import com.miluhe.rowsolitaireapp.R;
@@ -32,18 +36,16 @@ public class PokerStage extends Stage {
     private static int mCardOffset = 0;
     private static float mCardW = 0;
     private static float mCardH = 0;
+    private Point mScreenSize;
+    private float mStartX;
+    private float mStartY;
+    private int mMarcoCardLastIndex = 16;
 
-    
-    // FIXME
-    //  get from values folder
-    private static final float KMarcoCardBeginX = 100.0f;
-    private static final float KMarcoCardBeginY = 100.0f;
-    // end
     List<PokerCard> mListActors = new ArrayList<PokerCard>();
 
     static {
         mCardOffset = SolitaireApplication.getContextObject()
-				.getResources().getInteger(R.dimen.cardoffset);	
+				.getResources().getInteger(R.dimen.cardoffset);
         try {
 	    	TypedValue v = new TypedValue();
 	    	SolitaireApplication.getContextObject()
@@ -59,11 +61,9 @@ public class PokerStage extends Stage {
     }
     
     public PokerStage() {
-//        Texture bgTexture = 
-//        		SolitaireTextureLoader.instance().load(SolitaireTextureLoader.KPokerTable);
-        String fileName = "textures/pokertable_bg.png";
-        Texture texture = new Texture( Gdx.files.internal( fileName ) );
-        mBackgroundImage = new Image( texture );
+        Texture bgTexture =
+        		SolitaireTextureLoader.instance().load(SolitaireTextureLoader.KPokerTable);
+        mBackgroundImage = new Image( bgTexture );
 
         this.addActor( mBackgroundImage );
         helper = new LogicHelper();
@@ -72,18 +72,28 @@ public class PokerStage extends Stage {
         mCardsA = helper.showAlphaCards();
         mCardsB = helper.showBelleCards();
         mCardsM = helper.showMarcoCards();
+        mMarcoCardLastIndex = mCardsM.length - 1;
+        mScreenSize = new Point();
 
-        Point screenSize = new Point();
+        SaveUtils.getScreenSize(mScreenSize);
+        mStartX = (mScreenSize.x - 16*mCardOffset - mCardW) / 2;
+        mStartY = 100.0f;
 
-        SaveUtils.getScreenSize(screenSize);
-        float x = (screenSize.x - 16*mCardOffset - mCardW) / 2;
-        float y = KMarcoCardBeginY;
+        float x = mStartX;
+        float y = mStartY;
+        int i = 0;
 
-        for ( int i : mCardsM ) {
-            PokerCard poker = new PokerCard( i );
+        for ( int value : mCardsM ) {
+            PokerCard poker = new PokerCard( value );
             poker.setPosition( x, y );
+            if ( i == mCardsM.length - 1 ) {
+                poker.setSize( new Vector2(mCardW, mCardH ));
+            } else {
+                poker.setSize( new Vector2(mCardOffset, mCardH) );
+            }
 
             x += mCardOffset;
+            ++i;
             this.addActor( poker );
             mListActors.add(poker);
         }
@@ -95,6 +105,43 @@ public class PokerStage extends Stage {
         mHeight = h;
 
         mBackgroundImage.setSize( mWidth, mHeight );
+    }
+
+    private void refreshMarcoCardsSizes( int playedIndex ) {
+        if ( playedIndex > 0 && playedIndex < mMarcoCardLastIndex ) {
+            // play card in middle, fresh previous card's size + played card's width
+            Vector2 prevSize = new Vector2();
+            Vector2 currSize = new Vector2();
+
+            int i = playedIndex - 1;
+            for (; i >= 0; --i ) {
+                // find previous un-played or un-passed card
+                if (mListActors.get(i).getmStatus() == PokerCard.TCardStatus.EAvailable) {
+                    mListActors.get(i).getSize( prevSize );
+                    break;
+                }
+            }
+
+            if ( -1 == i ) {
+                // not found
+                return;
+            }
+            mListActors.get(playedIndex).getSize( currSize );
+
+            float tmpSizeW = prevSize.x + currSize.x;
+            if ( tmpSizeW > mCardW ) {
+                tmpSizeW = mCardW;
+            }
+            mListActors.get(i).setSize(new Vector2(tmpSizeW, mCardH));
+        } else if ( playedIndex == mMarcoCardLastIndex ) {
+            // play card in the last, fresh previous card's size to card width
+            if (playedIndex == 0) {
+                return;
+            }
+            mListActors.get(playedIndex-1).setSize(new Vector2(mCardW, mCardH));
+        } else {
+            // do nothing
+        }
     }
 
     // --------------------------------------------------------------------------------
@@ -113,12 +160,6 @@ public class PokerStage extends Stage {
 
     @Override
     public boolean keyUp(int arg0) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int arg0, int arg1) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -143,35 +184,46 @@ public class PokerStage extends Stage {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        // TODO Auto-generated method stub
+        Vector2 stageVec = screenToStageCoordinates(new Vector2(screenX, screenY));
 
-        int relativeX = (int)(screenX - KMarcoCardBeginX);
-        int relativeY = (int)(screenY - KMarcoCardBeginY - 160);
+        int i = 0;
+        for ( PokerCard card : mListActors ) {
+            PokerCard actPoker = (PokerCard)card.hit( stageVec.x, stageVec.y, true );
+            if (actPoker != null) {
+                MoveToAction moveTo = Actions.moveTo(mScreenSize.x / 2
+                        , mScreenSize.y / 2, 1);
+                ScaleByAction scaleBy = Actions.scaleBy(-0.25f, -0.25f, 1);
+                ParallelAction actions = Actions.parallel(moveTo, scaleBy);
+                actPoker.addAction(actions);
 
-        int index = -1;
-        if ( relativeY >=0 && relativeY <= 160
-                &&  relativeX >=0 && relativeX <= 16*mCardOffset+120 ) {
-            if (relativeX > 16*mCardOffset ) {
-                index = 16;
-            } else {
-                index = (int)(relativeX / mCardOffset);
+                refreshMarcoCardsSizes( i );
+                if ( i == mMarcoCardLastIndex) {
+                    --mMarcoCardLastIndex;
+                }
+
+                helper.setMarcoCard(actPoker.getmValue());
+                break;
             }
+            ++i;
 
-//			if ( index != -1 ) {
-//				int[] newSequence = new int[3];
-//				helper.getPlayersCard(newSequence);
-//				PokerCard actor = mListActors.get(index);
-//		        MoveToAction moveTo = Actions.moveTo(Gdx.graphics.getWidth() / 2
-//		        		, Gdx.graphics.getHeight()/2);
-//				actor.addAction(moveTo);
-//				helper.setPlayerCard(actor.getmValue());
-//				helper.getPlayersCard(newSequence);
-//				Log.e("*******", "Alpha: "+newSequence[0]);
-//				Log.e("*******", "Belle: "+newSequence[1]);
-//				Log.e("*******", "Marco: "+newSequence[2]);
-//
-//			}
         }
+//        int index;
+//        if ( relativeY >= 0 && relativeY <= mCardH
+//                &&  relativeX >=0 && relativeX <= 16*mCardOffset+mCardW ) {
+//            if (relativeX > 16*mCardOffset ) {
+//                index = 16;
+//            } else {
+//                index = relativeX / mCardOffset;
+//            }
+//
+//			if ( index != -1 ) {
+//				PokerCard actor = mListActors.get(index);
+//		        MoveToAction moveTo = Actions.moveTo(mScreenSize.x / 2
+//                        , mScreenSize.y / 2);
+//				actor.addAction(moveTo);
+//				helper.setMarcoCard(actor.getmValue());
+//			}
+//        }
         return false;
     }
 
