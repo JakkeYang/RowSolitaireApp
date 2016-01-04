@@ -125,15 +125,12 @@ public class PokerCard extends Actor {
 
     @Override
     public Actor hit(float x, float y, boolean touchable) {
+    	if (mStatus != TCardStatus.EAvailable 
+    			&& mStatus != TCardStatus.EReadyToPlay )
+    		return null;
+    	
         if ( x > mPositionX && x <=mPositionX + mSizeX
                 && y > mPositionY && y <= mPositionY + mSizeY ) {
-            if (mStatus == TCardStatus.EAvailable) {
-                mStatus = TCardStatus.EReadyToPlay;
-            } else if (mStatus == TCardStatus.EReadyToPlay) {
-                // TODO:
-                // need to check pass status
-                mStatus = TCardStatus.EPlayed;
-            }
             return this;
         } else {
             return null;
@@ -141,7 +138,7 @@ public class PokerCard extends Actor {
     }
 
     /**
-     * 为将来动画做好准备
+     * future animation
      */
     private void update() {
 

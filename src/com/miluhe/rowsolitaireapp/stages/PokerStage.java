@@ -21,6 +21,7 @@ import com.miluhe.rowsolitaireapp.R;
 import com.miluhe.rowsolitaireapp.SolitaireApplication;
 import com.miluhe.rowsolitaireapp.SolitaireTextureLoader;
 import com.miluhe.rowsolitaireapp.actors.PokerCard;
+import com.miluhe.rowsolitaireapp.actors.PokerCard.TCardStatus;
 
 /**
  * Created by jakke on 15-12-29.
@@ -116,7 +117,8 @@ public class PokerStage extends Stage {
             int i = playedIndex - 1;
             for (; i >= 0; --i ) {
                 // find previous un-played or un-passed card
-                if (mListActors.get(i).getmStatus() == PokerCard.TCardStatus.EAvailable) {
+                if (mListActors.get(i).getmStatus() == PokerCard.TCardStatus.EAvailable
+                		|| mListActors.get(i).getmStatus() == PokerCard.TCardStatus.EReadyToPlay ) {
                     mListActors.get(i).getSize( prevSize );
                     break;
                 }
@@ -144,6 +146,11 @@ public class PokerStage extends Stage {
         }
     }
 
+    @Override
+    public void dispose() {
+    	helper.cleanTable();
+    }
+    
     // --------------------------------------------------------------------------------
     //  InputProcessor
     @Override
@@ -190,40 +197,32 @@ public class PokerStage extends Stage {
         for ( PokerCard card : mListActors ) {
             PokerCard actPoker = (PokerCard)card.hit( stageVec.x, stageVec.y, true );
             if (actPoker != null) {
-                MoveToAction moveTo = Actions.moveTo(mScreenSize.x / 2
-                        , mScreenSize.y / 2, 1);
-                ScaleByAction scaleBy = Actions.scaleBy(-0.25f, -0.25f, 1);
-                ParallelAction actions = Actions.parallel(moveTo, scaleBy);
-                actPoker.addAction(actions);
-
-                refreshMarcoCardsSizes( i );
-                if ( i == mMarcoCardLastIndex) {
-                    --mMarcoCardLastIndex;
-                }
-
-                helper.setMarcoCard(actPoker.getmValue());
+            	if (actPoker.getmStatus() == TCardStatus.EReadyToPlay) {
+	                MoveToAction moveTo = Actions.moveTo(mScreenSize.x / 2
+	                        , mScreenSize.y / 2, 1);
+	                ScaleByAction scaleBy = Actions.scaleBy(-0.25f, -0.25f, 1);
+	                ParallelAction actions = Actions.parallel(moveTo, scaleBy);
+	                actPoker.addAction(actions);
+	
+	                refreshMarcoCardsSizes( i );
+	                if ( i == mMarcoCardLastIndex) {
+	                    --mMarcoCardLastIndex;
+	                }
+	
+	                helper.setMarcoCard(actPoker.getmValue());
+	                actPoker.setmStatus(TCardStatus.EPlayed);
+            	} else if (actPoker.getmStatus() == TCardStatus.EAvailable) {
+            		// get card ready
+            		MoveToAction moveTo = Actions.moveTo(actPoker.getX()
+	                        , actPoker.getY() + mCardOffset);
+            		actPoker.addAction(moveTo);
+            		actPoker.setmStatus(TCardStatus.EReadyToPlay);
+            	}
                 break;
             }
             ++i;
 
         }
-//        int index;
-//        if ( relativeY >= 0 && relativeY <= mCardH
-//                &&  relativeX >=0 && relativeX <= 16*mCardOffset+mCardW ) {
-//            if (relativeX > 16*mCardOffset ) {
-//                index = 16;
-//            } else {
-//                index = relativeX / mCardOffset;
-//            }
-//
-//			if ( index != -1 ) {
-//				PokerCard actor = mListActors.get(index);
-//		        MoveToAction moveTo = Actions.moveTo(mScreenSize.x / 2
-//                        , mScreenSize.y / 2);
-//				actor.addAction(moveTo);
-//				helper.setMarcoCard(actor.getmValue());
-//			}
-//        }
         return false;
     }
 
