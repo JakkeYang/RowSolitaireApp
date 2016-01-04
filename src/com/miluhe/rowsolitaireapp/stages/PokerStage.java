@@ -40,7 +40,10 @@ public class PokerStage extends Stage {
     private Point mScreenSize;
     private float mStartX;
     private float mStartY;
+    private float mPlayedCardStartX;
+    private float mPlayedCardStartY;
     private int mMarcoCardLastIndex = 16;
+    private static final float KScale = 0.75f;
 
     List<PokerCard> mListActors = new ArrayList<PokerCard>();
 
@@ -69,6 +72,8 @@ public class PokerStage extends Stage {
         this.addActor( mBackgroundImage );
         helper = new LogicHelper();
 
+        // FIXME
+        //  Need to display who's the first player, spade 7
         helper.startTable();
         mCardsA = helper.showAlphaCards();
         mCardsB = helper.showBelleCards();
@@ -79,6 +84,8 @@ public class PokerStage extends Stage {
         SaveUtils.getScreenSize(mScreenSize);
         mStartX = (mScreenSize.x - 16*mCardOffset - mCardW) / 2;
         mStartY = 100.0f;
+        mPlayedCardStartX = (mScreenSize.x - 4*KScale*mCardW - 3*mCardOffset) / 2;
+        mPlayedCardStartY = 300.f + mCardH;
 
         float x = mStartX;
         float y = mStartY;
@@ -146,6 +153,47 @@ public class PokerStage extends Stage {
         }
     }
 
+    private void moveToPosition( int cardValue, Vector2 dest ) {
+        int suit = (cardValue % 13 == 0)? cardValue / 13 - 1 : cardValue / 13;
+        int value = (cardValue % 13 == 0)? 13 : cardValue % 13;
+
+        dest.x = suit * ( KScale * mCardW + mCardOffset ) + mPlayedCardStartX;
+        dest.y = ( 13 - value ) * mCardOffset + mPlayedCardStartY;
+
+    }
+
+    // FIXME
+    //  need to add pass logic
+    private void showAlphaCard() {
+        int cardValue = helper.getAlphaCard();
+        PokerCard poker = new PokerCard( cardValue );
+        Vector2 pos = new Vector2();
+
+        poker.setBounds( .0f, mScreenSize.y - KScale*mCardH, KScale*mCardW, KScale*mCardH);
+        this.addActor( poker );
+
+        moveToPosition( cardValue, pos );
+        MoveToAction moveTo = Actions.moveTo( pos.x, pos.y, 1 );
+        ScaleByAction scaleBy = Actions.scaleBy( -0.25f, -0.25f, 1 );
+        ParallelAction actions = Actions.parallel( moveTo, scaleBy );
+        poker.addAction(actions);
+    }
+
+    private void showBelleCard() {
+        int cardValue = helper.getBelleCard();
+        PokerCard poker = new PokerCard( cardValue );
+        Vector2 pos = new Vector2();
+
+        poker.setBounds( mScreenSize.x - KScale*mCardW
+                , mScreenSize.y - KScale*mCardH, KScale*mCardW, KScale*mCardH);
+        this.addActor( poker );
+
+        moveToPosition( cardValue, pos );
+        MoveToAction moveTo = Actions.moveTo( pos.x, pos.y, 1 );
+        ScaleByAction scaleBy = Actions.scaleBy( -0.25f, -0.25f, 1 );
+        ParallelAction actions = Actions.parallel( moveTo, scaleBy );
+        poker.addAction(actions);
+    }
     @Override
     public void dispose() {
     	helper.cleanTable();
@@ -191,32 +239,39 @@ public class PokerStage extends Stage {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        Vector2 stageVec = screenToStageCoordinates(new Vector2(screenX, screenY));
+        Vector2 stageVec = screenToStageCoordinates( new Vector2(screenX, screenY) );
 
         int i = 0;
         for ( PokerCard card : mListActors ) {
             PokerCard actPoker = (PokerCard)card.hit( stageVec.x, stageVec.y, true );
-            if (actPoker != null) {
-            	if (actPoker.getmStatus() == TCardStatus.EReadyToPlay) {
-	                MoveToAction moveTo = Actions.moveTo(mScreenSize.x / 2
-	                        , mScreenSize.y / 2, 1);
-	                ScaleByAction scaleBy = Actions.scaleBy(-0.25f, -0.25f, 1);
-	                ParallelAction actions = Actions.parallel(moveTo, scaleBy);
+            if ( actPoker != null ) {
+            	if ( actPoker.getmStatus() == TCardStatus.EReadyToPlay ) {
+                    // FIXME
+                    //  need to check whether the card is available
+                    Vector2 dest = new Vector2();
+                    moveToPosition( actPoker.getmValue(), dest );
+	                MoveToAction moveTo = Actions.moveTo( dest.x, dest.y, 1 );
+	                ScaleByAction scaleBy = Actions.scaleBy( -0.25f, -0.25f, 1 );
+	                ParallelAction actions = Actions.parallel( moveTo, scaleBy );
 	                actPoker.addAction(actions);
 	
 	                refreshMarcoCardsSizes( i );
-	                if ( i == mMarcoCardLastIndex) {
+	                if ( i == mMarcoCardLastIndex ) {
 	                    --mMarcoCardLastIndex;
 	                }
 	
-	                helper.setMarcoCard(actPoker.getmValue());
-	                actPoker.setmStatus(TCardStatus.EPlayed);
-            	} else if (actPoker.getmStatus() == TCardStatus.EAvailable) {
+	                helper.setMarcoCard( actPoker.getmValue() );
+	                actPoker.setmStatus( TCardStatus.EPlayed );
+
+                    showAlphaCard();
+
+                    showBelleCard();
+                } else if ( actPoker.getmStatus() == TCardStatus.EAvailable ) {
             		// get card ready
-            		MoveToAction moveTo = Actions.moveTo(actPoker.getX()
-	                        , actPoker.getY() + mCardOffset);
-            		actPoker.addAction(moveTo);
-            		actPoker.setmStatus(TCardStatus.EReadyToPlay);
+            		MoveToAction moveTo = Actions.moveTo( actPoker.getX()
+	                        , actPoker.getY() + mCardOffset );
+            		actPoker.addAction( moveTo );
+            		actPoker.setmStatus( TCardStatus.EReadyToPlay );
             	}
                 break;
             }
