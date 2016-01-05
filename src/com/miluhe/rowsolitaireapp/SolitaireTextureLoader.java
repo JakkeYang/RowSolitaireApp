@@ -21,11 +21,11 @@ public class SolitaireTextureLoader implements Disposable {
 		mTextures = new HashMap<String, Texture>();
 //		mAssetManager = new AssetManager();
 		
-		String fileName = "poker/cards.png";
+		String fileName = "texture/cards.png";
         Texture texture = new Texture( Gdx.files.internal( fileName ) );
         mTextures.put( KPokerTexture, texture );
         
-        fileName = "textures/pokertable_bg.png";
+        fileName = "texture/pokertable_bg.png";
         Texture textureTable = new Texture( Gdx.files.internal( fileName ) );
         mTextures.put( KPokerTable, textureTable );
 	}

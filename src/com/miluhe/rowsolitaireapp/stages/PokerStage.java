@@ -6,6 +6,7 @@ import java.util.List;
 import utils.SaveUtils;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Point;
+import android.util.Log;
 import android.util.TypedValue;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -22,6 +23,7 @@ import com.miluhe.rowsolitaireapp.SolitaireApplication;
 import com.miluhe.rowsolitaireapp.SolitaireTextureLoader;
 import com.miluhe.rowsolitaireapp.actors.PokerCard;
 import com.miluhe.rowsolitaireapp.actors.PokerCard.TCardStatus;
+import com.miluhe.rowsolitaireapp.actors.TextOutput;
 
 /**
  * Created by jakke on 15-12-29.
@@ -43,6 +45,7 @@ public class PokerStage extends Stage {
     private float mPlayedCardStartX;
     private float mPlayedCardStartY;
     private int mMarcoCardLastIndex = 16;
+    private TextOutput mTextView = null;
     private static final float KScale = 0.75f;
 
     List<PokerCard> mListActors = new ArrayList<PokerCard>();
@@ -72,12 +75,11 @@ public class PokerStage extends Stage {
         this.addActor( mBackgroundImage );
         helper = new LogicHelper();
 
-        // FIXME
-        //  Need to display who's the first player, spade 7
         helper.startTable();
         mCardsA = helper.showAlphaCards();
         mCardsB = helper.showBelleCards();
         mCardsM = helper.showMarcoCards();
+
         mMarcoCardLastIndex = mCardsM.length - 1;
         mScreenSize = new Point();
 
@@ -104,6 +106,25 @@ public class PokerStage extends Stage {
             ++i;
             this.addActor( poker );
             mListActors.add(poker);
+        }
+
+        int firstPlayerInx = helper.getFirstPlayerIndex();
+        showFirstCard();
+
+        if (firstPlayerInx == 0) {
+            // marco play first, need to show alpha and belle
+            showAlphaCard();
+            showBelleCard();
+            Log.e("*** RS ***", "Marco played first");
+        } else if (firstPlayerInx == 1) {
+            // alpha play first, just show belle
+            showBelleCard();
+            Log.e("*** RS ***", "Alpha played first");
+        } else if (firstPlayerInx == 2) {
+            // belle play first, do nothing
+            Log.e("*** RS ***", "Belle played first");
+        } else {
+            // wrong
         }
 
     }
@@ -166,6 +187,21 @@ public class PokerStage extends Stage {
     //  need to add pass logic
     private void showAlphaCard() {
         int cardValue = helper.getAlphaCard();
+
+        if ( cardValue == 0 ) {
+            // 0 means pass
+            int[] alphaPoints = helper.getAlphaPoints();
+            int count = 0;
+            for (int i : alphaPoints) {
+                count += i;
+            }
+
+            if ( count > 0 ) {
+                showText("Alpha passed card");
+                Log.e("*** RS ***", "alpha passed");
+            }
+            return;
+        }
         PokerCard poker = new PokerCard( cardValue );
         Vector2 pos = new Vector2();
 
@@ -181,6 +217,20 @@ public class PokerStage extends Stage {
 
     private void showBelleCard() {
         int cardValue = helper.getBelleCard();
+        if (cardValue == 0) {
+            // 0 means pass
+            int[] bellePoints = helper.getBellePoints();
+            int count = 0;
+            for (int i : bellePoints) {
+                count += i;
+            }
+
+            if ( count > 0 ) {
+                showText("Belle passed card");
+                Log.e("*** RS ***", "belle passed");
+            }
+            return;
+        }
         PokerCard poker = new PokerCard( cardValue );
         Vector2 pos = new Vector2();
 
@@ -194,6 +244,28 @@ public class PokerStage extends Stage {
         ParallelAction actions = Actions.parallel( moveTo, scaleBy );
         poker.addAction(actions);
     }
+
+    /// spade 7 always shows at the first place
+    private void showFirstCard() {
+        PokerCard poker = new PokerCard( 7 );
+        Vector2 pos = new Vector2();
+        moveToPosition( 7, pos );
+        poker.setBounds( pos.x , pos.y, KScale*mCardW, KScale*mCardH);
+        this.addActor(poker);
+    }
+
+    private void showText(String txt) {
+//        if (mTextView == null) {
+            mTextView = new TextOutput(txt);
+//        } else {
+//            mTextView.setText(txt);
+//        }
+        Vector2 pos = new Vector2(50.0f, 200.0f + mCardH);
+
+        mTextView.setPosition(pos.x, pos.y);
+
+        this.addActor(mTextView);
+    }
     @Override
     public void dispose() {
     	helper.cleanTable();
@@ -202,38 +274,12 @@ public class PokerStage extends Stage {
     // --------------------------------------------------------------------------------
     //  InputProcessor
     @Override
-    public boolean keyDown(int arg0) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char arg0) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean keyUp(int arg0) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int arg0) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
     public boolean touchDown(int arg0, int arg1, int arg2, int arg3) {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean touchDragged(int arg0, int arg1, int arg2) {
-        // TODO Auto-generated method stub
         return false;
     }
 
