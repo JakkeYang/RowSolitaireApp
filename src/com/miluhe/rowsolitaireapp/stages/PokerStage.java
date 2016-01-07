@@ -11,12 +11,14 @@ import android.util.TypedValue;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.actions.ParallelAction;
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleByAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.Array;
 import com.miluhe.rowsolitaire.LogicHelper;
 import com.miluhe.rowsolitaireapp.R;
 import com.miluhe.rowsolitaireapp.SolitaireApplication;
@@ -71,8 +73,8 @@ public class PokerStage extends Stage {
         Texture bgTexture =
         		SolitaireTextureLoader.instance().load(SolitaireTextureLoader.KPokerTable);
         mBackgroundImage = new Image( bgTexture );
-
         this.addActor( mBackgroundImage );
+        mBackgroundImage.setZIndex(0);
         helper = new LogicHelper();
 
         helper.startTable();
@@ -104,7 +106,9 @@ public class PokerStage extends Stage {
 
             x += mCardOffset;
             ++i;
+
             this.addActor( poker );
+            poker.setZIndex(i);
             mListActors.add(poker);
         }
 
@@ -207,7 +211,7 @@ public class PokerStage extends Stage {
 
         poker.setBounds( .0f, mScreenSize.y - KScale*mCardH, KScale*mCardW, KScale*mCardH);
         this.addActor( poker );
-
+        reArrangeZIndex(poker);
         moveToPosition( cardValue, pos );
         MoveToAction moveTo = Actions.moveTo( pos.x, pos.y, 1 );
         ScaleByAction scaleBy = Actions.scaleBy( -0.25f, -0.25f, 1 );
@@ -237,6 +241,7 @@ public class PokerStage extends Stage {
         poker.setBounds( mScreenSize.x - KScale*mCardW
                 , mScreenSize.y - KScale*mCardH, KScale*mCardW, KScale*mCardH);
         this.addActor( poker );
+        reArrangeZIndex(poker);
 
         moveToPosition( cardValue, pos );
         MoveToAction moveTo = Actions.moveTo( pos.x, pos.y, 1 );
@@ -252,19 +257,41 @@ public class PokerStage extends Stage {
         moveToPosition( 7, pos );
         poker.setBounds( pos.x , pos.y, KScale*mCardW, KScale*mCardH);
         this.addActor(poker);
+        reArrangeZIndex(poker);
     }
 
     private void showText(String txt) {
-//        if (mTextView == null) {
+        if (mTextView == null) {
             mTextView = new TextOutput(txt);
-//        } else {
-//            mTextView.setText(txt);
-//        }
+        } else {
+            mTextView.setText(txt);
+        }
         Vector2 pos = new Vector2(50.0f, 200.0f + mCardH);
 
         mTextView.setPosition(pos.x, pos.y);
 
         this.addActor(mTextView);
+    }
+
+    private void reArrangeZIndex(PokerCard insertCard) {
+        int cardValue = insertCard.getmValue();
+        Array<Actor> actors = this.getActors();
+        for (int i = 0; i < actors.size; ++i) {
+            if (actors.get(i) instanceof PokerCard) {
+                PokerCard card = (PokerCard)actors.get(i);
+                if (card.getmValue() > cardValue) {
+                    for (int j = actors.size - 2; j <= i; --j) {
+                        if (actors.get(j) instanceof PokerCard) {
+                            PokerCard cardRev = (PokerCard)actors.get(j);
+                            cardRev.setZIndex(cardRev.getZIndex()+1);
+                        }
+                    }
+                    insertCard.setZIndex(i);
+                    break;
+                }
+            }
+        }
+
     }
     @Override
     public void dispose() {
@@ -292,8 +319,32 @@ public class PokerStage extends Stage {
             PokerCard actPoker = (PokerCard)card.hit( stageVec.x, stageVec.y, true );
             if ( actPoker != null ) {
             	if ( actPoker.getmStatus() == TCardStatus.EReadyToPlay ) {
-                    // FIXME
-                    //  need to check whether the card is available
+                    if (!helper.canUserPlayCard(actPoker.getmValue())) {
+                        if (!helper.canUserContinue()) {
+                            // marco have to pass
+                            showText("you have to pass a card");
+                            Vector2 dest = new Vector2();
+                            moveToPosition( actPoker.getmValue(), dest );
+                            MoveToAction moveTo = Actions.moveTo( 0, 0, 1 );
+                            ScaleByAction scaleBy = Actions.scaleBy( -0.75f, -0.75f, 1 );
+                            ParallelAction actions = Actions.parallel( moveTo, scaleBy );
+                            actPoker.addAction(actions);
+                            refreshMarcoCardsSizes( i );
+                            if ( i == mMarcoCardLastIndex ) {
+                                --mMarcoCardLastIndex;
+                            }
+
+                            helper.setMarcoCard( actPoker.getmValue() );
+                            actPoker.setmStatus( TCardStatus.EPassed);
+                            break;
+                        }
+                        // get card ready
+                        MoveToAction moveTo = Actions.moveTo( actPoker.getX()
+                                , actPoker.getY() - mCardOffset );
+                        actPoker.addAction( moveTo );
+                        actPoker.setmStatus( TCardStatus.EAvailable );
+                        break;
+                    }
                     Vector2 dest = new Vector2();
                     moveToPosition( actPoker.getmValue(), dest );
 	                MoveToAction moveTo = Actions.moveTo( dest.x, dest.y, 1 );
@@ -309,9 +360,15 @@ public class PokerStage extends Stage {
 	                helper.setMarcoCard( actPoker.getmValue() );
 	                actPoker.setmStatus( TCardStatus.EPlayed );
 
+                    // clear text
+                    showText(" ");
                     showAlphaCard();
 
                     showBelleCard();
+
+                    if (helper.isGamesOver()) {
+                        showText("Game over!");
+                    }
                 } else if ( actPoker.getmStatus() == TCardStatus.EAvailable ) {
             		// get card ready
             		MoveToAction moveTo = Actions.moveTo( actPoker.getX()
