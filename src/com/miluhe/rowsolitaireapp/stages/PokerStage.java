@@ -68,7 +68,10 @@ public class PokerStage extends Stage {
     		e.printStackTrace();
     	}
     }
-    
+
+    /**
+     * Constructor
+     */
     public PokerStage() {
         Texture bgTexture =
         		SolitaireTextureLoader.instance().load(SolitaireTextureLoader.KPokerTable);
@@ -77,6 +80,13 @@ public class PokerStage extends Stage {
         mBackgroundImage.setZIndex(0);
         helper = new LogicHelper();
 
+        init();
+    }
+
+    /**
+     * init card table
+     */
+    private void init() {
         helper.startTable();
         mCardsA = helper.showAlphaCards();
         mCardsB = helper.showBelleCards();
@@ -130,9 +140,13 @@ public class PokerStage extends Stage {
         } else {
             // wrong
         }
-
     }
 
+    /**
+     * set background size
+     * @param w
+     * @param h
+     */
     public void setRegion( int w, int h ) {
         mWidth = w;
         mHeight = h;
@@ -140,7 +154,15 @@ public class PokerStage extends Stage {
         mBackgroundImage.setSize( mWidth, mHeight );
     }
 
-    private void refreshMarcoCardsSizes( int playedIndex ) {
+    /**
+     * refresh user's card size
+     *  once user played or pass a card, it will impact to left cards hit region
+     *
+     *  xxx seems that libgdx has mechanism to handle event instead
+     *
+     * @param playedIndex played or passed card's index in user cards list
+     */
+    private void refreshUserCardsSizes(int playedIndex) {
         if ( playedIndex > 0 && playedIndex < mMarcoCardLastIndex ) {
             // play card in middle, fresh previous card's size + played card's width
             Vector2 prevSize = new Vector2();
@@ -178,6 +200,12 @@ public class PokerStage extends Stage {
         }
     }
 
+    /**
+     * calculating played card (of user and AI) positon, in order to form into a queue
+     *
+     * @param cardValue card's value
+     * @param dest destination of this card
+     */
     private void moveToPosition( int cardValue, Vector2 dest ) {
         int suit = (cardValue % 13 == 0)? cardValue / 13 - 1 : cardValue / 13;
         int value = (cardValue % 13 == 0)? 13 : cardValue % 13;
@@ -187,8 +215,9 @@ public class PokerStage extends Stage {
 
     }
 
-    // FIXME
-    //  need to add pass logic
+    /**
+     * play Alpha (AI) card
+     */
     private void showAlphaCard() {
         int cardValue = helper.getAlphaCard();
 
@@ -219,6 +248,9 @@ public class PokerStage extends Stage {
         poker.addAction(actions);
     }
 
+    /**
+     * Play Belle (AI) card
+     */
     private void showBelleCard() {
         int cardValue = helper.getBelleCard();
         if (cardValue == 0) {
@@ -250,7 +282,9 @@ public class PokerStage extends Stage {
         poker.addAction(actions);
     }
 
-    /// spade 7 always shows at the first place
+    /**
+     * Play the first card (always spade 7)
+     */
     private void showFirstCard() {
         PokerCard poker = new PokerCard( 7 );
         Vector2 pos = new Vector2();
@@ -260,6 +294,10 @@ public class PokerStage extends Stage {
         reArrangeZIndex(poker);
     }
 
+    /**
+     * show indication text (a libgdx actor)
+     * @param txt indication text
+     */
     private void showText(String txt) {
         if (mTextView == null) {
             mTextView = new TextOutput(txt);
@@ -273,6 +311,14 @@ public class PokerStage extends Stage {
         this.addActor(mTextView);
     }
 
+    /**
+     * inserted card will cause the queue to re-index
+     *
+     * xxx stage doesn't provide a method to "insert" actor but add, however it can be done
+     *  via stage's root (Group) method
+     *
+     * @param insertCard inserted index
+     */
     private void reArrangeZIndex(PokerCard insertCard) {
         int cardValue = insertCard.getmValue();
         Array<Actor> actors = this.getActors();
@@ -280,36 +326,58 @@ public class PokerStage extends Stage {
             if (actors.get(i) instanceof PokerCard) {
                 PokerCard card = (PokerCard)actors.get(i);
                 if (card.getmValue() > cardValue) {
-                    for (int j = actors.size - 2; j <= i; --j) {
-                        if (actors.get(j) instanceof PokerCard) {
-                            PokerCard cardRev = (PokerCard)actors.get(j);
-                            cardRev.setZIndex(cardRev.getZIndex()+1);
-                        }
+                    for (int j = actors.size - 1; j <= i; --j) {
+                        actors.get(j).setZIndex(actors.get(j).getZIndex()+1);
                     }
                     insertCard.setZIndex(i);
                     break;
                 }
             }
         }
-
     }
+
+    /**
+     * release resources
+     */
     @Override
     public void dispose() {
     	helper.cleanTable();
+        helper = null;
     }
-    
-    // --------------------------------------------------------------------------------
-    //  InputProcessor
+
+    /**
+     * from InputProcessor
+     * @param arg0
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @return
+     */
     @Override
     public boolean touchDown(int arg0, int arg1, int arg2, int arg3) {
         return false;
     }
 
+    /**
+     * from InputProcessor
+     * @param arg0
+     * @param arg1
+     * @param arg2
+     * @return
+     */
     @Override
     public boolean touchDragged(int arg0, int arg1, int arg2) {
         return false;
     }
 
+    /**
+     * InputProcessor
+     * @param screenX
+     * @param screenY
+     * @param pointer
+     * @param button
+     * @return
+     */
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         Vector2 stageVec = screenToStageCoordinates( new Vector2(screenX, screenY) );
@@ -318,63 +386,41 @@ public class PokerStage extends Stage {
         for ( PokerCard card : mListActors ) {
             PokerCard actPoker = (PokerCard)card.hit( stageVec.x, stageVec.y, true );
             if ( actPoker != null ) {
+                // hit a card
             	if ( actPoker.getmStatus() == TCardStatus.EReadyToPlay ) {
+                    // hit card is ready to play or pass, or just put it back to available
                     if (!helper.canUserPlayCard(actPoker.getmValue())) {
+                        // user can't play this hit card, so it might be passed or back to available
                         if (!helper.canUserContinue()) {
-                            // marco have to pass
-                            showText("you have to pass a card");
-                            Vector2 dest = new Vector2();
-                            moveToPosition( actPoker.getmValue(), dest );
-                            MoveToAction moveTo = Actions.moveTo( 0, 0, 1 );
-                            ScaleByAction scaleBy = Actions.scaleBy( -0.75f, -0.75f, 1 );
-                            ParallelAction actions = Actions.parallel( moveTo, scaleBy );
-                            actPoker.addAction(actions);
-                            refreshMarcoCardsSizes( i );
+                            // user cannot continue, we take it as a "pass card"
+                            //  instead of putting back
+                            Vector2 dest = new Vector2(0,0);
+                            movePoker(actPoker, dest, -0.75f);
+                            refreshUserCardsSizes(i);
                             if ( i == mMarcoCardLastIndex ) {
+                                // passed last card, last index - 1
                                 --mMarcoCardLastIndex;
                             }
-
-                            helper.setMarcoCard( actPoker.getmValue() );
-                            actPoker.setmStatus( TCardStatus.EPassed);
-                            break;
+                        } else {
+                            // user actually can continue, so we take it
+                            //  as putting card back to available
+                            getReadyCard( actPoker, false );
                         }
-                        // get card ready
-                        MoveToAction moveTo = Actions.moveTo( actPoker.getX()
-                                , actPoker.getY() - mCardOffset );
-                        actPoker.addAction( moveTo );
-                        actPoker.setmStatus( TCardStatus.EAvailable );
-                        break;
-                    }
-                    Vector2 dest = new Vector2();
-                    moveToPosition( actPoker.getmValue(), dest );
-	                MoveToAction moveTo = Actions.moveTo( dest.x, dest.y, 1 );
-	                ScaleByAction scaleBy = Actions.scaleBy( -0.25f, -0.25f, 1 );
-	                ParallelAction actions = Actions.parallel( moveTo, scaleBy );
-	                actPoker.addAction(actions);
-	
-	                refreshMarcoCardsSizes( i );
-	                if ( i == mMarcoCardLastIndex ) {
-	                    --mMarcoCardLastIndex;
-	                }
-	
-	                helper.setMarcoCard( actPoker.getmValue() );
-	                actPoker.setmStatus( TCardStatus.EPlayed );
+                    } else {
+                        // hit card can be played, so be it
+                        Vector2 dest = new Vector2();
+                        moveToPosition(actPoker.getmValue(), dest);
+                        movePoker(actPoker, dest, -0.25f );
 
-                    // clear text
-                    showText(" ");
-                    showAlphaCard();
-
-                    showBelleCard();
-
-                    if (helper.isGamesOver()) {
-                        showText("Game over!");
+                        refreshUserCardsSizes(i);
+                        if (i == mMarcoCardLastIndex) {
+                            // played last card, last index - 1
+                            --mMarcoCardLastIndex;
+                        }
                     }
                 } else if ( actPoker.getmStatus() == TCardStatus.EAvailable ) {
             		// get card ready
-            		MoveToAction moveTo = Actions.moveTo( actPoker.getX()
-	                        , actPoker.getY() + mCardOffset );
-            		actPoker.addAction( moveTo );
-            		actPoker.setmStatus( TCardStatus.EReadyToPlay );
+                    getReadyCard( actPoker, true );
             	}
                 break;
             }
@@ -382,6 +428,73 @@ public class PokerStage extends Stage {
 
         }
         return false;
+    }
+
+    /**
+     * move played or passed card
+     * @param actPoker source card
+     * @param dest moved destination
+     * @param scale scale, negative to shrink
+     */
+    private void movePoker(PokerCard actPoker, Vector2 dest, float scale) {
+        MoveToAction moveTo = Actions.moveTo(dest.x, dest.y, 1);
+        ScaleByAction scaleBy = Actions.scaleBy(scale, scale, 1);
+        ParallelAction actions = Actions.parallel(moveTo, scaleBy);
+        actPoker.addAction(actions);
+
+        helper.setMarcoCard(actPoker.getmValue());
+        actPoker.setmStatus(TCardStatus.EPlayed);
+        updateCardTable();
+    }
+
+    /**
+     * move card between ready and not-ready
+     *
+     * @param actPoker card
+     * @param bReady true ready, false not ready
+     */
+    private void getReadyCard(PokerCard actPoker, boolean bReady) {
+        if (bReady) {
+            // get card ready, move upward
+            MoveToAction moveTo = Actions.moveTo( actPoker.getX()
+                    , actPoker.getY() + mCardOffset );
+            actPoker.addAction( moveTo );
+            actPoker.setmStatus( TCardStatus.EReadyToPlay );
+        } else {
+            // put card back, move downward
+            MoveToAction moveTo = Actions.moveTo(actPoker.getX()
+                    , actPoker.getY() - mCardOffset);
+            actPoker.addAction( moveTo );
+            actPoker.setmStatus( TCardStatus.EAvailable );
+        }
+    }
+
+    /**
+     * update card table, after user played or passed a card
+     */
+    private void updateCardTable() {
+        // clear text
+        showText(" ");
+
+        // show AI alpha card (played or passed)
+        showAlphaCard();
+
+        // show AI belle card (played or passed)
+        showBelleCard();
+
+        // check if game is over
+        if (helper.isGamesOver()) {
+            showText("Game over!");
+            // FIXME
+            // go to result stage
+            return;
+        }
+
+        // check if user can continue, if not, notify him
+        if (!helper.canUserContinue()) {
+            // marco have to pass
+            showText("you have to pass a card");
+        }
     }
 
 }
