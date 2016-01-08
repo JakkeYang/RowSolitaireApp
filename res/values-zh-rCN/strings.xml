@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">排七接龙</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="poker_stage_alpha_pass">阿尔法无牌可打</string>
+    <string name="poker_stage_belle_pass">贝拉无牌可打</string>
+    <string name="poker_stage_marco_pass">你无牌可打，闷牌吧</string>
+    <string name="poker_stage_game_over">游戏结束</string>
+</resources>
