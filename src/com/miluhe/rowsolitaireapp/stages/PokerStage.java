@@ -23,6 +23,7 @@ import com.miluhe.rowsolitaire.LogicHelper;
 import com.miluhe.rowsolitaireapp.R;
 import com.miluhe.rowsolitaireapp.SolitaireApplication;
 import com.miluhe.rowsolitaireapp.SolitaireTextureLoader;
+import com.miluhe.rowsolitaireapp.actors.PlayerAvatar;
 import com.miluhe.rowsolitaireapp.actors.PokerCard;
 import com.miluhe.rowsolitaireapp.actors.PokerCard.TCardStatus;
 import com.miluhe.rowsolitaireapp.actors.TextOutput;
@@ -50,7 +51,10 @@ public class PokerStage extends Stage {
     private TextOutput mTextView = null;
     private static final float KScale = 0.75f;
 
+    // Actors
     List<PokerCard> mListActors = new ArrayList<PokerCard>();
+    private PlayerAvatar mActorAlpha;
+    private PlayerAvatar mActorBelle;
 
     static {
         mCardOffset = SolitaireApplication.getContextObject()
@@ -81,6 +85,8 @@ public class PokerStage extends Stage {
         helper = new LogicHelper();
 
         init();
+
+        initPlayerAvatar();
     }
 
     /**
@@ -142,6 +148,23 @@ public class PokerStage extends Stage {
         }
     }
 
+    private void initPlayerAvatar() {
+        mActorAlpha = new PlayerAvatar(SolitaireTextureLoader.KPlayerAlpha);
+        mActorBelle = new PlayerAvatar(SolitaireTextureLoader.KPlayerBelle);
+
+//        mActorAlpha.setBounds( .0f, mScreenSize.y - 128
+//                , 128, 128);
+        mActorAlpha.setBounds( mScreenSize.x/2, mScreenSize.y/2
+                , 128, 128);
+        mActorBelle.setBounds( mScreenSize.x - 128
+                , mScreenSize.y - 128, 128, 128);
+
+
+        this.addActor(mActorAlpha);
+
+        this.addActor(mActorBelle);
+
+    }
     /**
      * set background size
      * @param w
@@ -476,12 +499,6 @@ public class PokerStage extends Stage {
         // clear text
         showText(" ");
 
-        // show AI alpha card (played or passed)
-        showAlphaCard();
-
-        // show AI belle card (played or passed)
-        showBelleCard();
-
         // check if game is over
         if (helper.isGamesOver()) {
             showText("Game over!");
@@ -489,6 +506,12 @@ public class PokerStage extends Stage {
             // go to result stage
             return;
         }
+
+        // show AI alpha card (played or passed)
+        showAlphaCard();
+
+        // show AI belle card (played or passed)
+        showBelleCard();
 
         // check if user can continue, if not, notify him
         if (!helper.canUserContinue()) {

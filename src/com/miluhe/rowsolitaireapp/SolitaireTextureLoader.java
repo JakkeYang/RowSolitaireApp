@@ -12,7 +12,9 @@ import com.badlogic.gdx.utils.Disposable;
 public class SolitaireTextureLoader implements Disposable {
 	public static final String KPokerTexture = "cards";
 	public static final String KPokerTable = "table";
-	
+    public static final String KPlayerAlpha = "Alpha";
+	public static final String KPlayerBelle = "Belle";
+
 	private HashMap<String, Texture> mTextures;
 	private AssetManager mAssetManager;
 	private static SolitaireTextureLoader mSelf = null;
@@ -28,6 +30,16 @@ public class SolitaireTextureLoader implements Disposable {
         fileName = "texture/pokertable_bg.png";
         Texture textureTable = new Texture( Gdx.files.internal( fileName ) );
         mTextures.put( KPokerTable, textureTable );
+
+        fileName = "texture/alpha.png";
+        Texture textureAlpha = new Texture( Gdx.files.internal( fileName ) );
+        mTextures.put( KPlayerAlpha, textureAlpha );
+
+        fileName = "texture/belle.png";
+        Texture textureBelle = new Texture( Gdx.files.internal( fileName ) );
+        mTextures.put( KPlayerBelle, textureBelle );
+
+
 	}
 	
 	public static SolitaireTextureLoader instance() {
