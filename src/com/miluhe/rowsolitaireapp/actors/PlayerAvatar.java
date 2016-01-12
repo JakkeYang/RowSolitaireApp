@@ -23,8 +23,6 @@ public class PlayerAvatar extends Actor {
 
     @Override
     public void draw(SpriteBatch batch, float parentAlpha) {
-        batch.draw( mTexture, getX(), getY()
-                , getOriginX(), getOriginY(), getWidth()
-                , getHeight(), getScaleX(), getScaleY());
+    	batch.draw(mTexture, getX(), getY());
     }
 }

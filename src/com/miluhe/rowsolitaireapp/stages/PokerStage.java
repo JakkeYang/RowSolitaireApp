@@ -19,6 +19,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.ParallelAction;
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleByAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 import com.miluhe.rowsolitaire.LogicHelper;
 import com.miluhe.rowsolitaireapp.R;
 import com.miluhe.rowsolitaireapp.SolitaireApplication;
@@ -35,7 +37,7 @@ public class PokerStage extends Stage {
     private Image mBackgroundImage;
     private int mHeight;
     private int mWidth;
-    private LogicHelper helper;
+    private LogicHelper mHelper;
     private int[] mCardsA = new int[17];
     private int[] mCardsB = new int[17];
     private int[] mCardsM = new int[17];
@@ -76,13 +78,13 @@ public class PokerStage extends Stage {
     /**
      * Constructor
      */
-    public PokerStage() {
+    public PokerStage(LogicHelper helper) {
         Texture bgTexture =
         		SolitaireTextureLoader.instance().load(SolitaireTextureLoader.KPokerTable);
         mBackgroundImage = new Image( bgTexture );
         this.addActor( mBackgroundImage );
         mBackgroundImage.setZIndex(0);
-        helper = new LogicHelper();
+        mHelper = helper;
 
         init();
 
@@ -93,10 +95,10 @@ public class PokerStage extends Stage {
      * init card table
      */
     private void init() {
-        helper.startTable();
-        mCardsA = helper.showAlphaCards();
-        mCardsB = helper.showBelleCards();
-        mCardsM = helper.showMarcoCards();
+        mHelper.startTable();
+        mCardsA = mHelper.showAlphaCards();
+        mCardsB = mHelper.showBelleCards();
+        mCardsM = mHelper.showMarcoCards();
 
         mMarcoCardLastIndex = mCardsM.length - 1;
         mScreenSize = new Point();
@@ -128,7 +130,7 @@ public class PokerStage extends Stage {
             mListActors.add(poker);
         }
 
-        int firstPlayerInx = helper.getFirstPlayerIndex();
+        int firstPlayerInx = mHelper.getFirstPlayerIndex();
         showFirstCard();
 
         if (firstPlayerInx == 0) {
@@ -152,12 +154,11 @@ public class PokerStage extends Stage {
         mActorAlpha = new PlayerAvatar(SolitaireTextureLoader.KPlayerAlpha);
         mActorBelle = new PlayerAvatar(SolitaireTextureLoader.KPlayerBelle);
 
-//        mActorAlpha.setBounds( .0f, mScreenSize.y - 128
-//                , 128, 128);
-        mActorAlpha.setBounds( mScreenSize.x/2, mScreenSize.y/2
-                , 128, 128);
-        mActorBelle.setBounds( mScreenSize.x - 128
-                , mScreenSize.y - 128, 128, 128);
+        mActorAlpha.setBounds( .0f, mScreenSize.y - PlayerAvatar.KPlayerTextureY
+                , PlayerAvatar.KPlayerTextureX, PlayerAvatar.KPlayerTextureY);
+        mActorBelle.setBounds( mScreenSize.x - PlayerAvatar.KPlayerTextureX
+        		, mScreenSize.y - PlayerAvatar.KPlayerTextureY
+                , PlayerAvatar.KPlayerTextureX, PlayerAvatar.KPlayerTextureY);
 
 
         this.addActor(mActorAlpha);
@@ -242,18 +243,21 @@ public class PokerStage extends Stage {
      * play Alpha (AI) card
      */
     private void showAlphaCard() {
-        int cardValue = helper.getAlphaCard();
+        int cardValue = mHelper.getAlphaCard();
 
         if ( cardValue == 0 ) {
             // 0 means pass
-            int[] alphaPoints = helper.getAlphaPoints();
+            int[] alphaPoints = mHelper.getAlphaPoints();
             int count = 0;
             for (int i : alphaPoints) {
                 count += i;
             }
 
             if ( count > 0 ) {
-                showText("Alpha passed card");
+            	String notification = SolitaireApplication.getContextObject()
+            			.getResources()
+            			.getString(R.string.poker_stage_alpha_pass);
+                showText(notification);
                 Log.e("*** RS ***", "alpha passed");
             }
             return;
@@ -275,17 +279,20 @@ public class PokerStage extends Stage {
      * Play Belle (AI) card
      */
     private void showBelleCard() {
-        int cardValue = helper.getBelleCard();
+        int cardValue = mHelper.getBelleCard();
         if (cardValue == 0) {
             // 0 means pass
-            int[] bellePoints = helper.getBellePoints();
+            int[] bellePoints = mHelper.getBellePoints();
             int count = 0;
             for (int i : bellePoints) {
                 count += i;
             }
 
             if ( count > 0 ) {
-                showText("Belle passed card");
+            	String notification = SolitaireApplication.getContextObject()
+            			.getResources()
+            			.getString(R.string.poker_stage_belle_pass);
+                showText(notification);
                 Log.e("*** RS ***", "belle passed");
             }
             return;
@@ -364,8 +371,7 @@ public class PokerStage extends Stage {
      */
     @Override
     public void dispose() {
-    	helper.cleanTable();
-        helper = null;
+    	// note intended to release here, but screen
     }
 
     /**
@@ -412,9 +418,9 @@ public class PokerStage extends Stage {
                 // hit a card
             	if ( actPoker.getmStatus() == TCardStatus.EReadyToPlay ) {
                     // hit card is ready to play or pass, or just put it back to available
-                    if (!helper.canUserPlayCard(actPoker.getmValue())) {
+                    if (!mHelper.canUserPlayCard(actPoker.getmValue())) {
                         // user can't play this hit card, so it might be passed or back to available
-                        if (!helper.canUserContinue()) {
+                        if (!mHelper.canUserContinue()) {
                             // user cannot continue, we take it as a "pass card"
                             //  instead of putting back
                             Vector2 dest = new Vector2(0,0);
@@ -465,7 +471,7 @@ public class PokerStage extends Stage {
         ParallelAction actions = Actions.parallel(moveTo, scaleBy);
         actPoker.addAction(actions);
 
-        helper.setMarcoCard(actPoker.getmValue());
+        mHelper.setMarcoCard(actPoker.getmValue());
         actPoker.setmStatus(TCardStatus.EPlayed);
         updateCardTable();
     }
@@ -500,10 +506,22 @@ public class PokerStage extends Stage {
         showText(" ");
 
         // check if game is over
-        if (helper.isGamesOver()) {
-            showText("Game over!");
-            // FIXME
-            // go to result stage
+        if (mHelper.isGamesOver()) {
+        	String notification = SolitaireApplication.getContextObject()
+        			.getResources()
+        			.getString(R.string.poker_stage_game_over);
+            showText(notification);
+            
+            Timer timer = new Timer();
+
+            Task timerTask = new Task() {
+             @Override
+                public void run() {
+            	 SolitaireApplication
+                 .setStageMarker(SolitaireApplication.TStageMarker.EStageResult);
+                }
+            };
+            timer.scheduleTask(timerTask, 10, 1, 1);
             return;
         }
 
@@ -514,9 +532,12 @@ public class PokerStage extends Stage {
         showBelleCard();
 
         // check if user can continue, if not, notify him
-        if (!helper.canUserContinue()) {
+        if (!mHelper.canUserContinue()) {
             // marco have to pass
-            showText("you have to pass a card");
+        	String notification = SolitaireApplication.getContextObject()
+        			.getResources()
+        			.getString(R.string.poker_stage_marco_pass);
+            showText(notification);
         }
     }
 

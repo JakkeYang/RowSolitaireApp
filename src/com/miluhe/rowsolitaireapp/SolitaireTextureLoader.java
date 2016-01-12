@@ -14,6 +14,7 @@ public class SolitaireTextureLoader implements Disposable {
 	public static final String KPokerTable = "table";
     public static final String KPlayerAlpha = "Alpha";
 	public static final String KPlayerBelle = "Belle";
+	public static final String KPlayerMarco = "Marco";
 
 	private HashMap<String, Texture> mTextures;
 	private AssetManager mAssetManager;
@@ -39,6 +40,9 @@ public class SolitaireTextureLoader implements Disposable {
         Texture textureBelle = new Texture( Gdx.files.internal( fileName ) );
         mTextures.put( KPlayerBelle, textureBelle );
 
+        fileName = "texture/marco.png";
+        Texture textureMarco = new Texture( Gdx.files.internal( fileName ) );
+        mTextures.put( KPlayerMarco, textureMarco );
 
 	}
 	
