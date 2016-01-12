@@ -1,4 +1,4 @@
-package utils;
+package com.miluhe.rowsolitaireapp.utils;
 
 import com.miluhe.rowsolitaireapp.SolitaireApplication;
 

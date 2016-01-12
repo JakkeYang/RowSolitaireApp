@@ -3,7 +3,8 @@
     <item name="cardoffset" type="dimen" format="integer">48</item>
     <item name="cardx" type="dimen" format="float">270</item>
     <item name="cardy" type="dimen" format="float">375</item>
-    <item name="cardPlayedx" type="dimen" format="float">135</item>
-    <item name="cardPlayedy" type="dimen" format="float">187.5</item>
+    <item name="cardresultoffset" type="dimen" format="integer">40</item>
+    <item name="cardresultx" type="dimen" format="float">135</item>
+    <item name="cardresulty" type="dimen" format="float">187.5</item>
 
 </resources>

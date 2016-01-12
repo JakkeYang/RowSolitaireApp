@@ -33,6 +33,7 @@ public class PlayPokerScreen implements Screen {
     	mStartStage = new StartStage();
         mPokerStage = new PokerStage(mHelper);
         mResultStage = new ResultStage(mHelper);
+        mPokerStage.setmResultOberser(mResultStage);
 
         batch = new SpriteBatch();
         font = new BitmapFont();
@@ -83,6 +84,7 @@ public class PlayPokerScreen implements Screen {
         mHeight = height;
 
         mPokerStage.setRegion( mWidth, mHeight );
+        mResultStage.setRegion( mWidth, mHeight );
     }
 
     @Override

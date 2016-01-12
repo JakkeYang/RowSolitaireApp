@@ -1,6 +1,6 @@
 package com.miluhe.rowsolitaireapp;
 
-import utils.SaveUtils;
+import com.miluhe.rowsolitaireapp.utils.SaveUtils;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Bundle;

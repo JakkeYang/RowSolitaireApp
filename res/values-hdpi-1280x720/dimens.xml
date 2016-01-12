@@ -2,8 +2,9 @@
 <resources>
     <item name="cardoffset" type="dimen" format="integer">32</item>
     <item name="cardx" type="dimen" format="float">135</item>
-    <item name="cardy" type="dimen" format="float">187</item>
-    <item name="cardPlayedx" type="dimen" format="float">135</item>
-    <item name="cardPlayedy" type="dimen" format="float">187.5</item>
+    <item name="cardy" type="dimen" format="float">187.5</item>
+    <item name="cardresultoffset" type="dimen" format="integer">25</item>
+    <item name="cardresultx" type="dimen" format="float">108</item>
+    <item name="cardresulty" type="dimen" format="float">150</item>
 
 </resources>

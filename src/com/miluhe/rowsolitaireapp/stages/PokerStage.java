@@ -3,7 +3,8 @@ package com.miluhe.rowsolitaireapp.stages;
 import java.util.ArrayList;
 import java.util.List;
 
-import utils.SaveUtils;
+import com.miluhe.rowsolitaireapp.utils.IResultObserver;
+import com.miluhe.rowsolitaireapp.utils.SaveUtils;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Point;
 import android.util.Log;
@@ -38,6 +39,7 @@ public class PokerStage extends Stage {
     private int mHeight;
     private int mWidth;
     private LogicHelper mHelper;
+    private IResultObserver mResultOberser;
     private int[] mCardsA = new int[17];
     private int[] mCardsB = new int[17];
     private int[] mCardsM = new int[17];
@@ -89,6 +91,10 @@ public class PokerStage extends Stage {
         init();
 
         initPlayerAvatar();
+    }
+
+    public void setmResultOberser(IResultObserver mResultOberser) {
+        this.mResultOberser = mResultOberser;
     }
 
     /**
@@ -166,6 +172,7 @@ public class PokerStage extends Stage {
         this.addActor(mActorBelle);
 
     }
+
     /**
      * set background size
      * @param w
@@ -519,9 +526,10 @@ public class PokerStage extends Stage {
                 public void run() {
             	 SolitaireApplication
                  .setStageMarker(SolitaireApplication.TStageMarker.EStageResult);
+                 mResultOberser.handleGameOver();
                 }
             };
-            timer.scheduleTask(timerTask, 10, 1, 1);
+            timer.scheduleTask(timerTask, 2, 1, 1);
             return;
         }
 
