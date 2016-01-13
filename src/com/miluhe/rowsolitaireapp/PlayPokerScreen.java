@@ -123,7 +123,7 @@ public class PlayPokerScreen implements Screen, IResultObserver {
         	 mResultStage.handleGameOver();
             }
         };
-        timer.scheduleTask(timerTask, 2, 1, 1);
+        timer.scheduleTask(timerTask, 2, 1, 0);
 		
 	}
 

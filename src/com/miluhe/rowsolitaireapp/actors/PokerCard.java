@@ -1,6 +1,7 @@
 package com.miluhe.rowsolitaireapp.actors;
 
 import android.content.res.Resources.NotFoundException;
+import android.util.Log;
 import android.util.TypedValue;
 
 import com.badlogic.gdx.Gdx;
@@ -71,7 +72,7 @@ public class PokerCard extends Actor {
         mValue = pokerValue;
         int suit = (mValue % 13 == 0)? mValue / 13 - 1 : mValue / 13;
         int value = (mValue % 13 == 0)? 13 : mValue % 13;
-        
+
         Texture texture =
             SolitaireTextureLoader.instance().load(SolitaireTextureLoader.KPokerTexture);
 

@@ -7,12 +7,15 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.util.TypedValue;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.DelayAction;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
+import com.badlogic.gdx.scenes.scene2d.actions.ParallelAction;
+import com.badlogic.gdx.scenes.scene2d.actions.RotateByAction;
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.actions.VisibleAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -145,10 +148,13 @@ public class ResultStage extends Stage {
         if (alphaPoints != null && alphaPoints.length > 0 ) {
             int xOffset = KCardStartX;
             for (int value : alphaPoints) {
+            	if (value == 0) {
+            		continue;
+            	}
             	int perValue = (value % 13 == 0)? 13 : value % 13;
                 mAlphaPoints += perValue;
                 PokerCard pokerCard = new PokerCard(value);
-                pokerCard.setPosition(xOffset, baseLineA);
+                pokerCard.setBounds(xOffset, baseLineA, mCardW, mCardH);
                 xOffset += mCardGap;
                 this.addActor(pokerCard);
             }
@@ -158,10 +164,13 @@ public class ResultStage extends Stage {
         if (bellePoints != null && bellePoints.length > 0 ) {
             int xOffset = KCardStartX;
             for (int value : bellePoints) {
+            	if (value == 0) {
+            		continue;
+            	}
             	int perValue = (value % 13 == 0)? 13 : value % 13;
                 mBellePoints += perValue;
                 PokerCard pokerCard = new PokerCard(value);
-                pokerCard.setPosition(xOffset, baseLineB);
+                pokerCard.setBounds(xOffset, baseLineB, mCardW, mCardH);
                 xOffset += mCardGap;
                 this.addActor(pokerCard);
             }
@@ -171,10 +180,13 @@ public class ResultStage extends Stage {
         if (marcoPoints != null && marcoPoints.length > 0 ) {
             int xOffset = KCardStartX;
             for (int value : marcoPoints) {
+            	if (value == 0) {
+            		continue;
+            	}
             	int perValue = (value % 13 == 0)? 13 : value % 13;
                 mMarcoPoints += perValue;
                 PokerCard pokerCard = new PokerCard(value);
-                pokerCard.setPosition(xOffset, baselineM);
+                pokerCard.setBounds(xOffset, baselineM, mCardW, mCardH);
                 xOffset += mCardGap;
                 this.addActor(pokerCard);
             }
@@ -194,14 +206,16 @@ public class ResultStage extends Stage {
         }
     	TextOutput txt = null;
     	txt = new TextOutput(result);
+    	txt.setPosition((mScreenSize.x - txt.getWidth()) / 2, .0f);
 		this.addActor(txt);
-		VisibleAction fadeOut = Actions.visible(false);
 		DelayAction delay = Actions.delay(3);
+		RotateByAction rot = Actions.rotateBy(360, 2);
 		MoveToAction moveTo = Actions.moveTo( (mScreenSize.x - txt.getWidth()) / 2
-				, mScreenSize.y - txt.getHeight() - 10
+				, mScreenSize.y / 2 - txt.getHeight()
 				, 2 );
-		SequenceAction actions = Actions.sequence(moveTo, delay, fadeOut);
-		txt.addAction(actions);
+		ParallelAction actions1 = Actions.parallel( moveTo, rot );
+		SequenceAction actions2 = Actions.sequence(actions1, delay);
+		txt.addAction(actions2);
     }
 
     public void handleGameOver() {

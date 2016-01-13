@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="cardoffset" type="dimen" format="integer">32</item>
+    <item name="cardx" type="dimen" format="float">90</item>
+    <item name="cardy" type="dimen" format="float">125</item>
+    <item name="cardresultoffset" type="dimen" format="integer">25</item>
+    <item name="cardresultx" type="dimen" format="float">108</item>
+    <item name="cardresulty" type="dimen" format="float">150</item>
+
+</resources>
