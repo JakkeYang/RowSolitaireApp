@@ -1,3 +1,3 @@
 # RowSolitaireApp
 row seven solitaire game, based on LibGDX
-developing...
+contact me if any commercial purpose
