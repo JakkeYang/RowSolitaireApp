@@ -6,15 +6,18 @@ import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 import com.miluhe.rowsolitaire.LogicHelper;
 import com.miluhe.rowsolitaireapp.stages.PokerStage;
 import com.miluhe.rowsolitaireapp.stages.ResultStage;
 import com.miluhe.rowsolitaireapp.stages.StartStage;
+import com.miluhe.rowsolitaireapp.utils.IResultObserver;
 
 /**
  * Created by jakke on 15-12-29.
  */
-public class PlayPokerScreen implements Screen {
+public class PlayPokerScreen implements Screen, IResultObserver {
 
     private int mHeight;
     private int mWidth;
@@ -33,13 +36,15 @@ public class PlayPokerScreen implements Screen {
     	mStartStage = new StartStage();
         mPokerStage = new PokerStage(mHelper);
         mResultStage = new ResultStage(mHelper);
-        mPokerStage.setmResultOberser(mResultStage);
+        mStartStage.setmResultOberser(this);
+        mPokerStage.setmResultOberser(this);
+        mResultStage.setmResultOberser(this);
 
         batch = new SpriteBatch();
         font = new BitmapFont();
         
         SolitaireApplication.
-          setStageMarker(SolitaireApplication.TStageMarker.EStagePokerTable);
+          setStageMarker(SolitaireApplication.TStageMarker.EStageStart);
     }
 
     // --------------------------------------------------------------------------------
@@ -83,6 +88,7 @@ public class PlayPokerScreen implements Screen {
         mWidth = width;
         mHeight = height;
 
+        mStartStage.setRegion( mWidth, mHeight );
         mPokerStage.setRegion( mWidth, mHeight );
         mResultStage.setRegion( mWidth, mHeight );
     }
@@ -104,4 +110,29 @@ public class PlayPokerScreen implements Screen {
         Gdx.input.setInputProcessor(mPokerStage);
 
     }
+
+	@Override
+	public void handleGameOver() {
+        Timer timer = new Timer();
+
+        Task timerTask = new Task() {
+         @Override
+            public void run() {
+        	 SolitaireApplication
+             .setStageMarker(SolitaireApplication.TStageMarker.EStageResult);
+        	 mResultStage.handleGameOver();
+            }
+        };
+        timer.scheduleTask(timerTask, 2, 1, 1);
+		
+	}
+
+	@Override
+	public void handlePlayAgain() {
+        mPokerStage = new PokerStage(mHelper);
+        mPokerStage.setRegion( mWidth, mHeight );
+        mPokerStage.setmResultOberser(this);
+        SolitaireApplication
+        .setStageMarker(SolitaireApplication.TStageMarker.EStagePokerTable);
+	}
 }

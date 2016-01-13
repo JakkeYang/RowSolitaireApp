@@ -18,3 +18,44 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-optimizationpasses 9
+
+-dontusemixedcaseclassnames
+
+-dontskipnonpubliclibraryclasses
+
+-dontskipnonpubliclibraryclassmembers
+
+-dontpreverify
+
+-verbose
+
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+
+
+-keep public class * extends android.app.Activity
+-keep public class * extends android.app.Application
+-keep public class * extends android.app.Service
+-keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.content.ContentProvider
+-keep public class * extends android.app.backup.BackupAgentHelper
+-keep public class * extends android.preference.Preference
+
+-libraryjars libs/android-support-v4.jar
+-libraryjars libs/gdx-backend-android.jar
+-libraryjars libs/gdx.jar
+-libraryjars libs/rowsevencore.jar
+
+-dontwarn java.awt.**
+-dontwarn com.badlogic.**
+-dontwarn com.badlogic.gdx.**
+-dontwarn com.badlogic.gdx.backends.android.**
+-dontwarn com.miluhe.rowsolitaire.**
+-dontwarn android.support.**
+
+-keep class com.badlogic.**{*;}
+-keep class com.badlogic.gdx.**{*;}
+-keep class android.support.**{*;}
+-keep class com.miluhe.rowsolitaire.**{*;}
+-keep class android.support.**{*;}

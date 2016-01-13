@@ -5,4 +5,5 @@ package com.miluhe.rowsolitaireapp.utils;
  */
 public interface IResultObserver {
     void handleGameOver();
+    void handlePlayAgain();
 }

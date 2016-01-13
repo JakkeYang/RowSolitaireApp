@@ -8,25 +8,35 @@ import android.graphics.Point;
 import android.util.TypedValue;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.DelayAction;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
+import com.badlogic.gdx.scenes.scene2d.actions.VisibleAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.miluhe.rowsolitaire.LogicHelper;
 import com.miluhe.rowsolitaireapp.R;
 import com.miluhe.rowsolitaireapp.SolitaireApplication;
 import com.miluhe.rowsolitaireapp.SolitaireTextureLoader;
 import com.miluhe.rowsolitaireapp.actors.PlayerAvatar;
 import com.miluhe.rowsolitaireapp.actors.PokerCard;
+import com.miluhe.rowsolitaireapp.actors.TemporaryActor;
+import com.miluhe.rowsolitaireapp.actors.TextOutput;
 
 /**
  * Created by jakke on 16-1-8.
  */
-public class ResultStage extends Stage implements IResultObserver {
+public class ResultStage extends Stage {
     private Point mScreenSize;
     private Image mBackgroundImage;
 	private PlayerAvatar mActorAlpha;
     private PlayerAvatar mActorBelle;
     private PlayerAvatar mActorMarco;
     private LogicHelper mHelper;
+    private IResultObserver mResultOberser;
     private int mAlphaPoints = 0;
     private int mBellePoints = 0;
     private int mMarcoPoints = 0;
@@ -65,6 +75,10 @@ public class ResultStage extends Stage implements IResultObserver {
         init();
     }
 
+    public void setmResultOberser(IResultObserver mResultOberser) {
+        this.mResultOberser = mResultOberser;
+    }
+    
     /**
      * set background size
      * @param w
@@ -106,7 +120,23 @@ public class ResultStage extends Stage implements IResultObserver {
         mABaseLine = baseLineA - mCardH - mCardGap;
         mBBaseLine = baseLineB - mCardH - mCardGap;
         mMBaseLine = baseLineM - mCardH - mCardGap;
+        
+        // set again button
+        TemporaryActor again = new TemporaryActor(SolitaireTextureLoader.KButtonRetry);
+        again.setPosition( (mScreenSize.x - again.getWidth()) /2 
+        		, mScreenSize.y - again.getHeight() -mCardGap );
+        this.addActor(again);
 
+        again.addListener(new ClickListener() {
+
+			@Override
+			public void touchUp(InputEvent event, float x, float y,
+					int pointer, int button) {
+				super.touchUp(event, x, y, pointer, button);
+				mResultOberser.handlePlayAgain();
+			}
+        	
+        });
 	}
 
     private void freshPassedPointCard(float baseLineA, float baseLineB, float baselineM ) {
@@ -115,7 +145,8 @@ public class ResultStage extends Stage implements IResultObserver {
         if (alphaPoints != null && alphaPoints.length > 0 ) {
             int xOffset = KCardStartX;
             for (int value : alphaPoints) {
-                mAlphaPoints += value;
+            	int perValue = (value % 13 == 0)? 13 : value % 13;
+                mAlphaPoints += perValue;
                 PokerCard pokerCard = new PokerCard(value);
                 pokerCard.setPosition(xOffset, baseLineA);
                 xOffset += mCardGap;
@@ -127,7 +158,8 @@ public class ResultStage extends Stage implements IResultObserver {
         if (bellePoints != null && bellePoints.length > 0 ) {
             int xOffset = KCardStartX;
             for (int value : bellePoints) {
-                mBellePoints += value;
+            	int perValue = (value % 13 == 0)? 13 : value % 13;
+                mBellePoints += perValue;
                 PokerCard pokerCard = new PokerCard(value);
                 pokerCard.setPosition(xOffset, baseLineB);
                 xOffset += mCardGap;
@@ -139,16 +171,39 @@ public class ResultStage extends Stage implements IResultObserver {
         if (marcoPoints != null && marcoPoints.length > 0 ) {
             int xOffset = KCardStartX;
             for (int value : marcoPoints) {
-                mMarcoPoints += value;
+            	int perValue = (value % 13 == 0)? 13 : value % 13;
+                mMarcoPoints += perValue;
                 PokerCard pokerCard = new PokerCard(value);
                 pokerCard.setPosition(xOffset, baselineM);
                 xOffset += mCardGap;
                 this.addActor(pokerCard);
             }
         }
+        
+        String result;
+        if (mMarcoPoints <= mBellePoints 
+        		&& mMarcoPoints <= mAlphaPoints) {
+        	result = SolitaireApplication.getContextObject()
+        			.getResources()
+        			.getString(R.string.poker_stage_game_win);
+
+        } else {
+        	result = SolitaireApplication.getContextObject()
+        			.getResources()
+        			.getString(R.string.poker_stage_game_lose);
+        }
+    	TextOutput txt = null;
+    	txt = new TextOutput(result);
+		this.addActor(txt);
+		VisibleAction fadeOut = Actions.visible(false);
+		DelayAction delay = Actions.delay(3);
+		MoveToAction moveTo = Actions.moveTo( (mScreenSize.x - txt.getWidth()) / 2
+				, mScreenSize.y - txt.getHeight() - 10
+				, 2 );
+		SequenceAction actions = Actions.sequence(moveTo, delay, fadeOut);
+		txt.addAction(actions);
     }
 
-    @Override
     public void handleGameOver() {
         freshPassedPointCard(mABaseLine, mBBaseLine, mMBaseLine);
     }

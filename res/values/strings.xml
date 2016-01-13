@@ -8,5 +8,17 @@
     <string name="poker_stage_belle_pass">Belle passed card</string>
     <string name="poker_stage_marco_pass">you have to pass a card</string>
     <string name="poker_stage_game_over">Game over!</string>
+    <string name="poker_stage_game_win">you win!</string>
+    <string name="poker_stage_game_lose">you lose!</string>
+    <string name="start_stage_help">Row Seven poker is a solitaire game,
+\n first player start with spade 7, and other player will follow with 8, or 6 and so on
+\n 7 in every suit is always available
+\n you can pass some card once you cannot contiue, thus can make you lose some point
+\n a proper passed card will make another players lose more point too
+\n lose point measured from 1 to 13, make sure you lose less than others!
+\n enjoy it!
+        </string>
+    <string name="start_stage_about">this is a game based on libGDX, written by Ke Yang
+        \n(jakke.yang@gmail.com) you can also find source code in github</string>
 
 </resources>

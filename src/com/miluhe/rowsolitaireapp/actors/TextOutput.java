@@ -1,5 +1,8 @@
 package com.miluhe.rowsolitaireapp.actors;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
+import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -11,6 +14,7 @@ import com.miluhe.rowsolitaireapp.SolitaireFontLoader;
 public class TextOutput extends Actor {
 
     private String mText;
+    private Color mColor;
 
     public TextOutput(String txt) {
         mText = txt;
@@ -21,7 +25,11 @@ public class TextOutput extends Actor {
     }
     @Override
     public void draw(SpriteBatch batch, float parentAlpha) {
+    	super.draw(batch, parentAlpha);
+    	mColor = batch.getColor();  
+        batch.setColor(getColor());  
         SolitaireFontLoader.instance().getFont()
-                .draw(batch, mText, getX(), getY());
+                .drawMultiLine(batch, mText, getX(), getY());
+        batch.setColor(mColor);
     }
 }

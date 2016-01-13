@@ -8,4 +8,19 @@
     <string name="poker_stage_belle_pass">贝拉无牌可打</string>
     <string name="poker_stage_marco_pass">你无牌可打，闷牌吧</string>
     <string name="poker_stage_game_over">游戏结束</string>
+    <string name="poker_stage_game_win">你赢了</string>
+    <string name="poker_stage_game_lose">你输了</string>
+        <string name="start_stage_help">排七接龙是一款接龙纸牌游戏
+\n  谁摸到黑桃7谁就应该首轮出牌
+\n  其他的玩家可以跟着出黑桃6或者8，以此类推
+\n  如果手上有其他花色的7，必须打出该牌
+\n  不能出的话只能选择闷牌
+\n  闷牌的技巧是永远让对方损失更多
+\n   比如，你可以闷掉8，这样后面的9-K全部得闷牌
+\n  最后统计分数,根据闷牌，分越高输的越惨
+\n  游戏愉快！
+        </string>
+    <string name="start_stage_about">基于libGDX开发
+\n  作者杨科(jakke.yang@gmail.com)
+\n  本游戏代码托管在github上</string>
 </resources>

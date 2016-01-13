@@ -17,6 +17,8 @@ public class SolitaireTextureLoader implements Disposable {
 	public static final String KPlayerMarco = "Marco";
     public static final String KButtonStart = "Start";
     public static final String KButtonRetry = "Retry";
+    public static final String KButtonHelp = "Help";
+    public static final String KButtonAbout = "About";
 
 	private HashMap<String, Texture> mTextures;
 	private AssetManager mAssetManager;
@@ -53,6 +55,14 @@ public class SolitaireTextureLoader implements Disposable {
         fileName = "texture/retry.png";
         Texture textureRetry = new Texture( Gdx.files.internal( fileName ) );
         mTextures.put( KButtonRetry, textureRetry );
+        
+        fileName = "texture/help.png";
+        Texture textureHelp = new Texture( Gdx.files.internal( fileName ) );
+        mTextures.put( KButtonHelp, textureHelp );
+        
+        fileName = "texture/about.png";
+        Texture textureAbout = new Texture( Gdx.files.internal( fileName ) );
+        mTextures.put( KButtonAbout, textureAbout );
 
 	}
 	

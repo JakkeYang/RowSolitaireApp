@@ -139,6 +139,14 @@ public class PokerStage extends Stage {
         int firstPlayerInx = mHelper.getFirstPlayerIndex();
         showFirstCard();
 
+        if (!mHelper.canUserContinue()) {
+            // marco have to pass
+        	String notification = SolitaireApplication.getContextObject()
+        			.getResources()
+        			.getString(R.string.poker_stage_marco_pass);
+            showText(notification);
+        }
+        
         if (firstPlayerInx == 0) {
             // marco play first, need to show alpha and belle
             showAlphaCard();
@@ -519,17 +527,8 @@ public class PokerStage extends Stage {
         			.getString(R.string.poker_stage_game_over);
             showText(notification);
             
-            Timer timer = new Timer();
-
-            Task timerTask = new Task() {
-             @Override
-                public void run() {
-            	 SolitaireApplication
-                 .setStageMarker(SolitaireApplication.TStageMarker.EStageResult);
-                 mResultOberser.handleGameOver();
-                }
-            };
-            timer.scheduleTask(timerTask, 2, 1, 1);
+            // notify observer game is over
+            mResultOberser.handleGameOver();
             return;
         }
 
