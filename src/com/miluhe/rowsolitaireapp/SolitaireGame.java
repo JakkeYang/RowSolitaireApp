@@ -19,6 +19,7 @@ public class SolitaireGame extends Game {
     public void dispose() {
     	mPlayScreen.dispose();
     	SolitaireTextureLoader.instance().dispose();
+        SolitaireFontLoader.instance().dispose();
     }
 
 }

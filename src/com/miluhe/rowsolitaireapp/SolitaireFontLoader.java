@@ -31,5 +31,7 @@ public class SolitaireFontLoader implements Disposable{
     @Override
     public void dispose() {
         mFont.dispose();
+        mFont = null;
+        mSelf = null; // wild reference, must be gc
     }
 }

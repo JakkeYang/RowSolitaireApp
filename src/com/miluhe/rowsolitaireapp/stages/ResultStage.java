@@ -1,5 +1,6 @@
 package com.miluhe.rowsolitaireapp.stages;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.miluhe.rowsolitaireapp.utils.IResultObserver;
 import com.miluhe.rowsolitaireapp.utils.SaveUtils;
 
@@ -7,7 +8,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.util.TypedValue;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -17,7 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.actions.ParallelAction;
 import com.badlogic.gdx.scenes.scene2d.actions.RotateByAction;
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
-import com.badlogic.gdx.scenes.scene2d.actions.VisibleAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.miluhe.rowsolitaire.LogicHelper;
@@ -28,6 +27,9 @@ import com.miluhe.rowsolitaireapp.actors.PlayerAvatar;
 import com.miluhe.rowsolitaireapp.actors.PokerCard;
 import com.miluhe.rowsolitaireapp.actors.TemporaryActor;
 import com.miluhe.rowsolitaireapp.actors.TextOutput;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by jakke on 16-1-8.
@@ -40,6 +42,8 @@ public class ResultStage extends Stage {
     private PlayerAvatar mActorMarco;
     private LogicHelper mHelper;
     private IResultObserver mResultOberser;
+    private List<Actor> mPokersCards;
+    private TextOutput mNotification;
     private int mAlphaPoints = 0;
     private int mBellePoints = 0;
     private int mMarcoPoints = 0;
@@ -75,6 +79,8 @@ public class ResultStage extends Stage {
         mScreenSize = new Point();
         mHelper = helper;
         SaveUtils.getScreenSize(mScreenSize);
+
+        mPokersCards = new ArrayList<Actor>();
         init();
     }
 
@@ -137,6 +143,18 @@ public class ResultStage extends Stage {
 					int pointer, int button) {
 				super.touchUp(event, x, y, pointer, button);
 				mResultOberser.handlePlayAgain();
+                mMarcoPoints = 0;
+                mBellePoints = 0;
+                mAlphaPoints = 0;
+
+                for (Actor actor : mPokersCards) {
+                    ResultStage.this.getRoot().removeActor(actor);
+                }
+
+                mPokersCards.clear();
+
+                ResultStage.this.getRoot().removeActor(mNotification);
+                mNotification = null;
 			}
         	
         });
@@ -157,6 +175,7 @@ public class ResultStage extends Stage {
                 pokerCard.setBounds(xOffset, baseLineA, mCardW, mCardH);
                 xOffset += mCardGap;
                 this.addActor(pokerCard);
+                mPokersCards.add(pokerCard);
             }
         }
         int [] bellePoints = mHelper.getBellePoints();
@@ -173,6 +192,7 @@ public class ResultStage extends Stage {
                 pokerCard.setBounds(xOffset, baseLineB, mCardW, mCardH);
                 xOffset += mCardGap;
                 this.addActor(pokerCard);
+                mPokersCards.add(pokerCard);
             }
         }
 
@@ -189,6 +209,7 @@ public class ResultStage extends Stage {
                 pokerCard.setBounds(xOffset, baselineM, mCardW, mCardH);
                 xOffset += mCardGap;
                 this.addActor(pokerCard);
+                mPokersCards.add(pokerCard);
             }
         }
         
@@ -198,24 +219,26 @@ public class ResultStage extends Stage {
         	result = SolitaireApplication.getContextObject()
         			.getResources()
         			.getString(R.string.poker_stage_game_win);
+            mNotification = new TextOutput(result);
 
         } else {
         	result = SolitaireApplication.getContextObject()
         			.getResources()
         			.getString(R.string.poker_stage_game_lose);
+            mNotification = new TextOutput(result);
         }
-    	TextOutput txt = null;
-    	txt = new TextOutput(result);
-    	txt.setPosition((mScreenSize.x - txt.getWidth()) / 2, .0f);
-		this.addActor(txt);
+
+
+        mNotification.setPosition((mScreenSize.x - mNotification.getWidth()) / 2, .0f);
+		this.addActor(mNotification);
 		DelayAction delay = Actions.delay(3);
 		RotateByAction rot = Actions.rotateBy(360, 2);
-		MoveToAction moveTo = Actions.moveTo( (mScreenSize.x - txt.getWidth()) / 2
-				, mScreenSize.y / 2 - txt.getHeight()
+		MoveToAction moveTo = Actions.moveTo( (mScreenSize.x - mNotification.getWidth()) / 2
+				, mScreenSize.y / 2 - mNotification.getHeight()
 				, 2 );
 		ParallelAction actions1 = Actions.parallel( moveTo, rot );
 		SequenceAction actions2 = Actions.sequence(actions1, delay);
-		txt.addAction(actions2);
+        mNotification.addAction(actions2);
     }
 
     public void handleGameOver() {

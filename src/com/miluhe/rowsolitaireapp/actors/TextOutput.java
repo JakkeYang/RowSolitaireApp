@@ -14,7 +14,6 @@ import com.miluhe.rowsolitaireapp.SolitaireFontLoader;
 public class TextOutput extends Actor {
 
     private String mText;
-    private Color mColor;
 
     public TextOutput(String txt) {
         mText = txt;
@@ -23,13 +22,13 @@ public class TextOutput extends Actor {
     public void setText(String txt) {
         mText = txt;
     }
+
     @Override
     public void draw(SpriteBatch batch, float parentAlpha) {
-    	super.draw(batch, parentAlpha);
-    	mColor = batch.getColor();  
-        batch.setColor(getColor());  
         SolitaireFontLoader.instance().getFont()
                 .drawMultiLine(batch, mText, getX(), getY());
-        batch.setColor(mColor);
+
     }
+
+
 }

@@ -85,6 +85,7 @@ public class SolitaireTextureLoader implements Disposable {
 			Map.Entry entry = (Map.Entry) iter.next();
 			Texture val = (Texture) entry.getValue();
 			val.dispose();
+            val = null;
 		}
         mSelf = null;
 	}
