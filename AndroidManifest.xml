@@ -21,7 +21,7 @@
             android:theme="@style/FullscreenTheme" >
         </activity>
         <activity
-            android:name=".SolitaireActivity"
+            android:name=".SolitaireActivity" 
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/FullscreenTheme">
             <intent-filter>

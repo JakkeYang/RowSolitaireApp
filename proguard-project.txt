@@ -42,10 +42,10 @@
 -keep public class * extends android.app.backup.BackupAgentHelper
 -keep public class * extends android.preference.Preference
 
--libraryjars libs/android-support-v4.jar
--libraryjars libs/gdx-backend-android.jar
--libraryjars libs/gdx.jar
--libraryjars libs/rowsevencore.jar
+#-libraryjars libs/android-support-v4.jar
+#-libraryjars libs/gdx-backend-android.jar
+#-libraryjars libs/gdx.jar
+#-libraryjars libs/rowsevencore.jar
 
 -dontwarn java.awt.**
 -dontwarn com.badlogic.**
